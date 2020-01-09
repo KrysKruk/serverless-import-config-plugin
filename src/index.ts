@@ -78,7 +78,6 @@ class ImportConfigPlugin {
     for (const yamlExtname of YAML_EXTNAMES) {
       const possibleFile = path.join(pathToImport, SERVERLESS + yamlExtname)
       const resolved = tryOrUndefined(() => resolveModule(possibleFile))
-      console.log(pathToImport, resolved)
       if (resolved) {
         return resolved
       }
@@ -95,12 +94,10 @@ class ImportConfigPlugin {
 
     // make all function handlers relative to the imported config file
     const { functions } = config
-    console.log('importPath:', importPath)
     const importDir = path.relative(REALPATH, path.dirname(importPath))
     if (functions != null) {
       Object.values(functions).forEach(func => {
         if (typeof func.handler === 'string') {
-          console.log('handler:', func.handler, importDir)
           func.handler = path.join(importDir, func.handler)
         }
       })
