@@ -21,6 +21,10 @@ interface ImportedConfig {
   }
 }
 
+interface BasedirOption {
+  basedir: string
+}
+
 class ImportConfigPlugin {
   serverless: Serverless.Instance
   originalPlugins: string[]
@@ -29,7 +33,7 @@ class ImportConfigPlugin {
     this.serverless = serverless
     this.originalPlugins = this.serverless.service.plugins?.slice() ?? []
 
-    this.importConfigs(this.serverless.service)
+    this.importConfigs(this.serverless.service, { basedir: REALPATH })
     this.loadImportedPlugins()
   }
 
@@ -40,17 +44,17 @@ class ImportConfigPlugin {
     return []
   }
 
-  private importConfigs(config: ImportedConfig) {
-    this.getImports(config).forEach(pathToImport => this.importConfig(pathToImport))
+  private importConfigs(config: ImportedConfig, { basedir }: BasedirOption) {
+    this.getImports(config).forEach(pathToImport => this.importConfig(pathToImport, { basedir }))
   }
 
-  private resolvePathToImport(pathToImport: string): string {
+  private resolvePathToImport(pathToImport: string, { basedir }: BasedirOption): string {
     // pass if has yaml extension
     if (YAML_EXTNAMES.has(path.extname(pathToImport))) {
       if (tryOrUndefined(() => statSync(pathToImport))) {
         return pathToImport
       }
-      const resolved = tryOrUndefined(() => resolveModule(pathToImport))
+      const resolved = tryOrUndefined(() => resolveModule(pathToImport, { basedir }))
       if (resolved) {
         return resolved
       }
@@ -77,7 +81,7 @@ class ImportConfigPlugin {
     const tries = []
     for (const yamlExtname of YAML_EXTNAMES) {
       const possibleFile = path.join(pathToImport, SERVERLESS + yamlExtname)
-      const resolved = tryOrUndefined(() => resolveModule(possibleFile))
+      const resolved = tryOrUndefined(() => resolveModule(possibleFile, { basedir }))
       if (resolved) {
         return resolved
       }
@@ -120,14 +124,14 @@ class ImportConfigPlugin {
       })
   }
 
-  private importConfig(pathToImport: string) {
+  private importConfig(pathToImport: string, { basedir }: BasedirOption) {
     this.serverless.cli.log(`Importing ${pathToImport}`)
-    const importPath = this.resolvePathToImport(pathToImport)
+    const importPath = this.resolvePathToImport(pathToImport, { basedir })
     let config: object
     try {
       config = this.serverless.utils.readFileSync(importPath)
       this.prepareImportedConfig({ importPath, config })
-      this.importConfigs(config)
+      this.importConfigs(config, { basedir: path.dirname(importPath) })
     } catch (error) {
       throw new this.serverless.classes.Error(`Error: Cannot import ${pathToImport}\nCause: ${error.message}`)
     }
