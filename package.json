@@ -1,0 +1,56 @@
+{
+  "name": "serverless-import-config-plugin",
+  "version": "0.0.0",
+  "description": "Adds possibility to import YAML files in serverless.yaml config file",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "echo 'Build' && tsc",
+    "watch": "npm-watch",
+    "prepublishOnly": "npm run build"
+  },
+  "watch": {
+    "build": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "ts",
+      "quiet": false
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KrysKruk/serverless-import-config-plugin.git"
+  },
+  "keywords": [
+    "serverless",
+    "plugins",
+    "lambda",
+    "aws",
+    "frontend",
+    "serverless.com",
+    "serverless.yaml"
+  ],
+  "author": {
+    "name": "Krystian Kruk",
+    "email": "kildyt@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/KrysKruk/serverless-import-config-plugin/issues"
+  },
+  "homepage": "https://github.com/KrysKruk/serverless-import-config-plugin#readme",
+  "devDependencies": {
+    "npm-watch": "^0.6.0",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "@types/lodash.difference": "^4.5.6",
+    "@types/lodash.set": "^4.3.6",
+    "@types/node": "^13.1.2",
+    "@types/resolve": "^1.14.0",
+    "lodash.difference": "^4.5.0",
+    "lodash.set": "^4.3.2",
+    "resolve": "^1.14.2"
+  }
+}
