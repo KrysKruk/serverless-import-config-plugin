@@ -1,7 +1,11 @@
 # Serverless Import Config Plugin
 
-The Serverless Framework doesn't give possibility to import and merge multiple `serverless.yml` config files.
-This plugin gives possibility to split main config file into smaller YAML files.
+Split your `serverless.yaml` config file into smaller modules and import them.
+
+By using this plugin you can build your serverless config from smaller parts separated by functionalities.
+Imported config is merged, so all keys are supported and lists are concatenated (without duplicates).
+
+Works on importing yaml files by path or node module, especially useful in multi-package repositories.
 
 ## Installation
 
