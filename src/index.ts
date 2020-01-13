@@ -7,7 +7,8 @@ import { tryOrUndefined, resolveModule } from './utils'
 
 const SERVERLESS = 'serverless'
 const DIRNAME = 'dirname'
-const YAML_EXTNAMES = new Set(['.yml', '.yaml'])
+const JS_EXTNAME = '.js'
+const CONFIG_EXTNAMES = new Set(['.yml', '.yaml', JS_EXTNAME])
 const REALPATH = realpathSync('.')
 
 interface ImportedConfig {
@@ -19,6 +20,11 @@ interface ImportedConfig {
       handler?: string
     }
   }
+}
+
+interface ImportOptions {
+  module: string
+  inputs: any
 }
 
 interface BasedirOption {
@@ -49,8 +55,8 @@ class ImportConfigPlugin {
   }
 
   private resolvePathToImport(pathToImport: string, { basedir }: BasedirOption): string {
-    // pass if has yaml extension
-    if (YAML_EXTNAMES.has(path.extname(pathToImport))) {
+    // pass if has config extension
+    if (CONFIG_EXTNAMES.has(path.extname(pathToImport))) {
       if (tryOrUndefined(() => statSync(pathToImport))) {
         return pathToImport
       }
@@ -61,12 +67,12 @@ class ImportConfigPlugin {
       throw new this.serverless.classes.Error(`Cannot import ${pathToImport}: the given file doesn't exist`)
     }
 
-    // if directory, add serverless.yaml
+    // if directory look for config file
     const stats = tryOrUndefined(() => statSync(pathToImport))
     if (stats?.isDirectory()) {
       const tries = []
-      for (const yamlExtname of YAML_EXTNAMES) {
-        const possibleFile = path.join(pathToImport, SERVERLESS + yamlExtname)
+      for (const configExtname of CONFIG_EXTNAMES) {
+        const possibleFile = path.join(pathToImport, SERVERLESS + configExtname)
         if (tryOrUndefined(() => statSync(possibleFile))) {
           return possibleFile
         }
@@ -79,8 +85,8 @@ class ImportConfigPlugin {
 
     // try to resolve as a module
     const tries = []
-    for (const yamlExtname of YAML_EXTNAMES) {
-      const possibleFile = path.join(pathToImport, SERVERLESS + yamlExtname)
+    for (const configExtname of CONFIG_EXTNAMES) {
+      const possibleFile = path.join(pathToImport, SERVERLESS + configExtname)
       const resolved = tryOrUndefined(() => resolveModule(possibleFile, { basedir }))
       if (resolved) {
         return resolved
@@ -124,12 +130,24 @@ class ImportConfigPlugin {
       })
   }
 
-  private importConfig(pathToImport: string, { basedir }: BasedirOption) {
+  private importConfig(options: ImportOptions | string, { basedir }: BasedirOption) {
+    const isFullOptions = typeof options === 'object' && options != null
+    const realOptions = isFullOptions ? <ImportOptions>options : { module: options as string, inputs: {} }
+    const { module: pathToImport, inputs } = realOptions
+
     this.serverless.cli.log(`Importing ${pathToImport}`)
     const importPath = this.resolvePathToImport(pathToImport, { basedir })
     let config: object
     try {
-      config = this.serverless.utils.readFileSync(importPath)
+      if (path.extname(importPath) === JS_EXTNAME) {
+        const importExports = require(importPath)
+        const importFunction = typeof importExports === 'function'
+          ? importExports
+          : importExports?.default
+        config = importFunction(inputs)
+      } else {
+        config = this.serverless.utils.readFileSync(importPath)
+      }
       this.prepareImportedConfig({ importPath, config })
       this.importConfigs(config, { basedir: path.dirname(importPath) })
     } catch (error) {

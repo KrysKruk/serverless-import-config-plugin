@@ -55,3 +55,30 @@ custom:
   webpack:
     webpackConfig: ${dirname}/webpack.config.js
 ```
+
+## Customizable boilerplates
+
+In case you want to customize imported config in more dynamic way, provide it as javascript file (`serverless.js`).
+
+```javascript
+module.exports = ({ name, schema }) => ({
+  provider: {
+    iamRoleStatements: [
+      // ...
+    ],
+  },
+  // ...
+})
+```
+
+You can pass arguments to the imported file using `module` and `inputs` fields:
+
+```yaml
+custom:
+  import:
+    - module: '@myproject/aws-dynamodb' # can be also a path to js file
+      inputs:
+        name: custom-table
+        schema:
+          # ...
+```
