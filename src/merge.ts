@@ -1,4 +1,4 @@
-import { isObject } from './utils'
+import { isObject } from "./utils"
 
 const merge = (target: any, source: any): object => {
   if (source == null) {
@@ -14,7 +14,7 @@ const merge = (target: any, source: any): object => {
     if (isObject(value) && isObject(target[key])) {
       // merge deeply
       target[key] = merge(target[key], value)
-    } else if (!(key in target)) {
+    } else if (target[key] === undefined) {
       // set new value but do not override
       target[key] = value
     }
