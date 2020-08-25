@@ -105,10 +105,11 @@ class ImportConfigPlugin {
     // make all function handlers relative to the imported config file
     const { functions } = config
     const importDir = path.relative(REALPATH, path.dirname(importPath))
+    const toPosixPath = (location: string) => location.split(path.sep).join(path.posix.sep);
     if (functions != null) {
       Object.values(functions).forEach(func => {
         if (typeof func.handler === 'string') {
-          func.handler = path.join(importDir, func.handler)
+          func.handler = toPosixPath(path.join(importDir, func.handler));
         }
       })
     }
