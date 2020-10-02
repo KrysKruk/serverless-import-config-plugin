@@ -1,3 +1,5 @@
+import differenceWith from 'lodash.differencewith';
+import isEqual from 'lodash.isequal';
 import { isObject } from "./utils"
 
 const merge = (target: any, source: any): object => {
@@ -6,8 +8,8 @@ const merge = (target: any, source: any): object => {
   }
 
   if (Array.isArray(target) && Array.isArray(source)) {
-    // add unique elements of source into target
-    return target.concat(source.filter(elem => !target.includes(elem)))
+    // add unique elements of source into target with deep equality comparison
+    return target.concat(differenceWith(source, target, isEqual));
   }
 
   Object.entries(source).forEach(([key, value]) => {
