@@ -1,5 +1,9 @@
 # Serverless Import Config Plugin
 
+##
+This is a fork of https://github.com/KrysKruk/serverless-import-config-plugin.git, created to quickly release version fixing the [issue](https://github.com/KrysKruk/serverless-import-config-plugin/issues/8) with comparing object array elements.  
+
+
 Split your `serverless.yaml` config file into smaller modules and import them.
 
 By using this plugin you can build your serverless config from smaller parts separated by functionalities.
