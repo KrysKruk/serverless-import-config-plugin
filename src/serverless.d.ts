@@ -23,6 +23,8 @@ declare namespace Serverless {
       }
     }
 
+    serviceDir: string
+
     utils: {
       readFileSync: (path: string) => object
     }

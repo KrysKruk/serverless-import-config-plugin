@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { statSync, realpathSync } from 'fs'
+import { statSync } from 'fs'
 import set from 'lodash.set'
 import difference from 'lodash.difference'
 import merge from './merge'
@@ -9,7 +9,6 @@ const SERVERLESS = 'serverless'
 const DIRNAME = 'dirname'
 const JS_EXTNAME = '.js'
 const CONFIG_EXTNAMES = new Set(['.yml', '.yaml', JS_EXTNAME])
-const REALPATH = realpathSync('.')
 
 interface ImportedConfig {
   custom?: {
@@ -39,7 +38,7 @@ class ImportConfigPlugin {
     this.serverless = serverless
     this.originalPlugins = this.serverless.service.plugins?.slice() ?? []
 
-    this.importConfigs(this.serverless.service, { basedir: REALPATH })
+    this.importConfigs(this.serverless.service, { basedir: this.serverless.serviceDir })
     this.loadImportedPlugins()
   }
 
@@ -56,11 +55,12 @@ class ImportConfigPlugin {
 
   private resolvePathToImport(pathToImport: string, { basedir }: BasedirOption): string {
     // pass if has config extension
-    if (CONFIG_EXTNAMES.has(path.extname(pathToImport))) {
-      if (tryOrUndefined(() => statSync(pathToImport))) {
-        return pathToImport
+    const correctedPathToImport = path.join(basedir, pathToImport)
+    if (CONFIG_EXTNAMES.has(path.extname(correctedPathToImport))) {
+      if (tryOrUndefined(() => statSync(correctedPathToImport))) {
+        return correctedPathToImport
       }
-      const resolved = tryOrUndefined(() => resolveModule(pathToImport, { basedir }))
+      const resolved = tryOrUndefined(() => resolveModule(correctedPathToImport, { basedir }))
       if (resolved) {
         return resolved
       }
@@ -68,11 +68,11 @@ class ImportConfigPlugin {
     }
 
     // if directory look for config file
-    const stats = tryOrUndefined(() => statSync(pathToImport))
+    const stats = tryOrUndefined(() => statSync(correctedPathToImport))
     if (stats?.isDirectory()) {
       const tries = []
       for (const configExtname of CONFIG_EXTNAMES) {
-        const possibleFile = path.join(pathToImport, SERVERLESS + configExtname)
+        const possibleFile = path.join(correctedPathToImport, SERVERLESS + configExtname)
         if (tryOrUndefined(() => statSync(possibleFile))) {
           return possibleFile
         }
@@ -99,12 +99,12 @@ class ImportConfigPlugin {
   }
 
   private prepareImportedConfig(options: { importPath: string, config: ImportedConfig }) {
-    const { variables } = this.serverless
+    const { variables, serviceDir } = this.serverless
     const { importPath, config } = options
 
     // make all function handlers relative to the imported config file
     const { functions } = config
-    const importDir = path.relative(REALPATH, path.dirname(importPath))
+    const importDir = path.relative(serviceDir, path.dirname(importPath))
     const toPosixPath = (location: string) => location.split(path.sep).join(path.posix.sep);
     if (functions != null) {
       Object.values(functions).forEach(func => {
