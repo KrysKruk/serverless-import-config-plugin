@@ -6,7 +6,7 @@ import merge from './merge'
 import { tryOrUndefined, resolveModule } from './utils'
 
 const SERVERLESS = 'serverless'
-const DIRNAME = 'dirname'
+const DIRNAME = 'imp:dirname'
 const JS_EXTNAME = '.js'
 const CONFIG_EXTNAMES = new Set(['.yml', '.yaml', JS_EXTNAME])
 
