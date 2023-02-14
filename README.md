@@ -1,3 +1,7 @@
+# Deprecation notice
+
+This plugin is no longer maintained. Check [serverless-import-plugin](https://github.com/AndrewChubatiuk/serverless-import-plugin), a fork made by [@AndrewChubatiuk](https://github.com/AndrewChubatiuk).
+
 # Serverless Import Config Plugin
 
 Split your `serverless.yaml` config file into smaller modules and import them.
