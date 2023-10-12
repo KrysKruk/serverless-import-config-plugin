@@ -52,12 +52,12 @@ functions:
     handler: functions/postOrder.handler # relative to the imported config
 ```
 
-For other fields you need to use `${dirname}` variable manually.
-`${dirname}` points to a directory of imported config file.
+For other fields you need to use `${imp:dirname}` variable manually.
+`${imp:dirname}` points to a directory of imported config file.
 ```yaml
 custom:
   webpack:
-    webpackConfig: ${dirname}/webpack.config.js
+    webpackConfig: ${imp:dirname}/webpack.config.js
 ```
 
 ## Customizable boilerplates
